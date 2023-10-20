@@ -1,7 +1,7 @@
 
 # Skeleton file 2 for Assignment 1 in BAN400. 
 # -------------------------------------------
-
+setwd("/Users/jameshaugen/Documents/git_lesson/git-jamhau")
 # More detailed steps to complete Problem 1.
 
 library(tidyverse)    # Contains most of what we need.
@@ -16,7 +16,7 @@ library(tidyverse)    # Contains most of what we need.
 # the file does not end with an "end of line"-character (EOL). This does not
 # seem to pose a problem later, and it seems that we can silece the warning by
 # switchin off the "warn"-argument. Do that if you wish.
-raw_file <- readLines(con = "?")
+raw_file <- readLines(con = "suites_dw_Table1.txt")
 
 # Identify the line number L of the separator line between the column names and
 # the rest of the data table.
@@ -31,15 +31,16 @@ raw_file <- readLines(con = "?")
 
 # What do you need to replace the two question marks with in order to extract
 # the first two letters?
-substr(x = raw_file, start = ?, stop = ?)
+substr(x = raw_file, start = 1, stop = 2)
 
 # The next step is then to find out *which* line starts with "--", and pick out
 # the first one. This can be done in a nice little pipe, where you have to fill
 # out the question marks and the missing function names:
 L <- 
-  (substr(x = raw_file, start = ?, stop = ?) == "?") %>% 
-  function_that_returns_the_index_of_all_TRUES %>% 
-  function_that_picks_out_the_minimum_value
+  (substr(x = raw_file, start = 1, stop = 2) == "--") %>% 
+  which() %>% 
+  min()
+
 
 # Save the variable descriptions (i.e. the information in lines 1:(L-2)) in a
 # text-file for future reference using the cat()-function. The first argument is
@@ -47,7 +48,8 @@ L <-
 # "raw_file"-vector on a separate line we also provide the sep-argument, where
 # we put the "end-of-line"-character "\n". We also need to come up with a file
 # name. Replace the question marks:
-cat(?, sep = "\n", file = "?")
+cat(raw_file[1:(L-2)], sep = "\n", file = "variable_desc.txt")
+
 
 # Extract the variable names (i.e. line (L-1)), store the names in a vector.
 
@@ -64,7 +66,7 @@ cat(?, sep = "\n", file = "?")
 # apply the str_trim()-function (also in the stringr-package) to get rid of all
 # the empty space. Replace the question mark below:
 variable_names <- 
-  str_split(string = ?, pattern = "\\|") %>% 
+  str_split(string = raw_file[L-1], pattern = "\\|") %>% 
   unlist() %>% 
   str_trim()
 
@@ -79,9 +81,10 @@ variable_names <-
 # super for this kind of search-and-replace. Replace the question mark below.
 
 comma_separated_values <- 
-  ? %>% 
+  raw_file[(L+1):length(raw_file)] %>% 
   gsub("\\|", ",", .) %>% 
   gsub(" ", "", .)
+
 
 # We then just add the variable names (separated with commas) on top, and
 # cat()-the whole ting to a .csv-file in the same way as we did with the
@@ -92,15 +95,77 @@ comma_separated_values_with_names <-
     comma_separated_values)    
 
 # Replace the question mark and come up with a file name
-cat(?, sep = "\n", file = "?")
+cat(comma_separated_values_with_names, sep = "\n", file = "cleaned_data.csv")
 
 # Read the file back in as a normal csv-file. The readr-package is part of
 # tidyverse, so it is already loaded.
-galaxies <- read_csv("?")
+galaxies <- read_csv("cleaned_data.csv")
 
 
 # You should now have a nice, clean data frame with galaxies and their
 # characteristics in memory. As of March 2022 it should contain 796
 # observations.
+
+
+#--------Problem 3 ----------
+
+library(ggplot2)
+galaxies$log_mhi <- as.numeric(as.character(galaxies$log_mhi))
+
+# Filtering out NA values for log_mhi
+filtered_galaxies <- galaxies[!is.na(galaxies$log_mhi),]
+
+
+# Plotting the histogram
+ggplot(filtered_galaxies, aes(x=log_mhi)) +
+  geom_histogram(binwidth=0.2, fill="blue", color="black", alpha=0.7) +
+  theme_minimal() +
+  labs(title="Distribution of log_mhi values", 
+       x="log_mhi", 
+       y="Number of galaxies")
+
+#Comment: 
+#The histogram shows a majority of galaxies within a specific "log_mhi" range.
+#The left side indicates fewer galaxies with lower hydrogen masses,
+#suggesting possible under-representation of smaller galaxies in the sample, 
+#using hydrogen mass as a size proxy.
+
+# -----Problem 4-------
+
+
+# Read the data 
+raw_file2 <- readLines(con = "UCNG_Table4.txt")
+
+
+substr(x = raw_file2, start = 1, stop = 2)
+L <- 
+  (substr(x = raw_file2, start = 1, stop = 2) == "--") %>% 
+  which() %>% 
+  min()
+
+cat(raw_file2[1:(L-2)], sep = "\n", file = "variable_desc2.txt")
+
+# Extract the variable names
+variable_names2 <- 
+  str_split(string = raw_file2[L-1], pattern = "\\|") %>% 
+  unlist() %>% 
+  str_trim()
+
+
+comma_separated_values2 <- 
+  raw_file2[(L+1):length(raw_file2)] %>% 
+  gsub("\\|", ",", .) %>% 
+  gsub(" ", "", .)
+
+comma_separated_values_with_names2 <- 
+  c(paste(variable_names2, collapse = ","),
+    comma_separated_values2)    
+
+cat(comma_separated_values_with_names2, sep = "\n", file = "cleaned_data2.csv")
+
+
+galaxies2 <- read_csv("cleaned_data2.csv")
+
+
 
 
